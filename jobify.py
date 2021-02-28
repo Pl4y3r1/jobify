@@ -27,7 +27,7 @@ results1 = soup1.find(id='ResultsContainer')
 results2 = soup2.find(id='resultsCol')
 
 jobs1 = results1.find_all('section', class_='card-content')
-jobs2 = results2.find_all('section', class_='card-content')
+jobs2 = results2.find_all('div', class_='jobsearch-SerpJobCard')
 
 searched_jobs1 = results1.find_all('h2', string=lambda text: ' '.join(args.Title))
 searched_jobs2 = results2.find_all('h2', string=lambda text: ' '.join(args.Title))
@@ -43,10 +43,11 @@ for s_job in searched_jobs2:
         link = s_job.find('a')['href'].replace("/rc/clk?","")
         link = link.split("id", 1)[0]
         print(s_job.text.strip())
-        print(f"Apply here: //www.indeed.com/viewjob?{link}\n")
+        print(f"Apply here: https://www.indeed.com/viewjob?{link}\n")
 
 print("Number of " + ' '.join(args.Title) + " Jobs Found")
 print(len(searched_jobs1) + len(searched_jobs2))
 print("Number of total Jobs")
 print(len(jobs1 + jobs2))
-print(results2.prettify())
+#print(results2.prettify())
+
