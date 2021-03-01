@@ -40,16 +40,6 @@ searched_jobs2 = results2.find_all(
 print("Number of " + ' '.join(args.Title) + " Jobs Found")
 print(len(searched_jobs1))
 
-#for s_job in searched_jobs1:
-#    link = s_job.find('a')['href']
-#    print(s_job.text.strip())
-#    print(f"Apply here: {link}\n")
-#for s_job in searched_jobs2:
-#    link = s_job.find('a')['href'].replace("/rc/clk?", "")
-#    link = link.split("id", 1)[0]
-#    print(s_job.text.strip())
-#    print(f"Apply here: https://www.indeed.com/viewjob?{link}\n")
-
 for s_job in jobs1:
     title = s_job.find('h2', class_='title')
     company = s_job.find('div', class_='company')
@@ -58,6 +48,20 @@ for s_job in jobs1:
     link = s_job.find('a')['href']
     print(title.text + company.text)
     print(link)
+for s_job in jobs2:
+    title = s_job.find('h2', class_='title')
+    company = s_job.find(class_='company')
+    if None in (title, company):
+        continue
+    link = s_job.find('a')['href'].replace("/rc/clk?", "")
+    link = link.split("id", 1)[0]
+    print(title.text + company.text)
+    if "company" in link:
+        print(f"https://www.indeed.com{link}")
+    if "pagead" in link:
+        print(f"https://www.indeed.com{link}")
+    else:
+        print(f"https://www.indeed.com/viewjob?{link}")
 
 print("Number of " + ' '.join(args.Title) + " Jobs Found")
 print(len(searched_jobs1) + len(searched_jobs2))
