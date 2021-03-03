@@ -16,29 +16,56 @@ args = parser.parse_args()
 url1 = 'https://www.monster.com/jobs/search/?q=' + \
     ' '.join(args.Title) + '&where=' + \
     ' '.join(args.Location) + '&stpage=1&page=10'
+urllist = []
 
-url2 = 'https://www.indeed.com/jobs?q=' + \
-    ' '.join(args.Title) + '&l=' + ' '.join(args.Location) + '&start=0'
+i = 0
+while i < 10:
+    urllist.append("https://www.indeed.com/jobs?q=" + " ".join(args.Title) + "&l=" + " ".join(args.Location) + "&start=" + str(i))
+    i += 1
+
+pagelist = []
 
 page1 = requests.get(url1)
-page2 = requests.get(url2)
+
+i = 0
+while i < 10:
+    pagelist.append(requests.get(urllist[i]))
+    i += 1
 
 soup1 = BeautifulSoup(page1.content, 'html.parser')
-soup2 = BeautifulSoup(page2.content, 'html.parser')
+souplist = []
+
+i = 0
+while i < 10:
+    souplist.append(BeautifulSoup(pagelist[i].content, 'html.parser'))
+    i += 1
 
 results1 = soup1.find(id='ResultsContainer')
-results2 = soup2.find(id='resultsCol')
+resultlist = []
+
+i = 0
+while i < 10:
+    resultlist.append(souplist[i].find(id='resultsCol'))
+    i += 1
 
 jobs1 = results1.find_all('section', class_='card-content')
-jobs2 = results2.find_all('div', class_='jobsearch-SerpJobCard')
+jobslist2 = []
+
+i = 0
+while i < 10:
+    jobslist2.append(resultlist[i].find_all('div', class_='jobsearch-SerpJobCard'))
+    i += 1
+
+i = 0
+jobslist3 = []
+while i < 10:
+    jobslist3 = jobslist3 + jobslist2[i]
+    i += 1
 
 searched_jobs1 = results1.find_all(
     'h2', string=lambda text: ' '.join(args.Title))
-searched_jobs2 = results2.find_all(
-    'h2', string=lambda text: ' '.join(args.Title))
-
-print("Number of " + ' '.join(args.Title) + " Jobs Found")
-print(len(searched_jobs1))
+#searched_jobs2 = results2.find_all(
+#    'h2', string=lambda text: ' '.join(args.Title))
 
 for s_job in jobs1:
     title = s_job.find('h2', class_='title')
@@ -48,7 +75,8 @@ for s_job in jobs1:
     link = s_job.find('a')['href']
     print(title.text + company.text)
     print(link)
-for s_job in jobs2:
+
+for s_job in jobslist3:
     title = s_job.find('h2', class_='title')
     company = s_job.find(class_='company')
     if None in (title, company):
@@ -63,8 +91,7 @@ for s_job in jobs2:
     else:
         print(f"https://www.indeed.com/viewjob?{link}")
 
-print("Number of " + ' '.join(args.Title) + " Jobs Found")
-print(len(searched_jobs1) + len(searched_jobs2))
+print("Number of " + ' '.join(args.Title) + " Jobs Found on Monster")
+print(len(searched_jobs1))
 print("Number of total Jobs")
-print(len(jobs1 + jobs2))
-# print(results2.prettify())
+print(len(jobs1) + len(jobslist3))
