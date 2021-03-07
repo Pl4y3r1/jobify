@@ -31,54 +31,44 @@ def getMonsterJobs(url):
 
     return joblist
 
+def getIndeedJobs(url):
+    joblist = []
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, 'html.parser')
+    result = soup.find(id='resultsCol')
+    jobs = result.find_all('div', class_='jobsearch-SerpJobCard')
+    for s_job in jobs:
+        title = s_job.find('h2', class_='title')
+        company = s_job.find(class_='company')
+        if None in (title, company):
+            continue
+        link = s_job.find('a')['href'].replace("/rc/clk?", "")
+        link = link.split("id", 1)[0]
+        if "company" in link:
+            link = "https://www.indeed.com" + link
+            joblist.append(JOB(title.text.strip(), company.text.strip(), link))
+        elif "pagead" in link:
+            link = "https://www.indeed.com" + link
+            joblist.append(JOB(title.text.strip(), company.text.strip(), link))
+        else:
+            link = " https://www.indeed.com/viewjob?" + link
+            joblist.append(JOB(title.text.strip(), company.text.strip(), link))
+    return joblist
+
 parser = argparse.ArgumentParser(description='Job Title and Location')
 parser.add_argument('Title', metavar='title', nargs='+', type=str, help='The tile of the job you want to search for')
 parser.add_argument('Location', metavar='location', nargs='+', type=str, help='The location you want to search in')
 args = parser.parse_args()
 
-url = 'https://www.monster.com/jobs/search/?q=' + \
-    ' '.join(args.Title) + '&where=' + \
-    ' '.join(args.Location) + '&stpage=1&page=10'
+url = 'https://www.monster.com/jobs/search/?q=' + ' '.join(args.Title) + '&where=' + ' '.join(args.Location) + '&stpage=1&page=10'
 urllist = []
+indJobs = []
 monJobs = getMonsterJobs(url)
 
 i = 0
 while i < 10:
-    urllist.append("https://www.indeed.com/jobs?q=" + " ".join(args.Title) + "&l=" + " ".join(args.Location) + "&start=" + str(i))
-    i += 1
-
-pagelist = []
-
-i = 0
-while i < 10:
-    pagelist.append(requests.get(urllist[i]))
-    i += 1
-
-souplist = []
-
-i = 0
-while i < 10:
-    souplist.append(BeautifulSoup(pagelist[i].content, 'html.parser'))
-    i += 1
-
-resultlist = []
-
-i = 0
-while i < 10:
-    resultlist.append(souplist[i].find(id='resultsCol'))
-    i += 1
-
-jobslist2 = []
-
-i = 0
-while i < 10:
-    jobslist2.append(resultlist[i].find_all('div', class_='jobsearch-SerpJobCard'))
-    i += 1
-
-i = 0
-jobslist3 = []
-while i < 10:
-    jobslist3 = jobslist3 + jobslist2[i]
+    url = "https://www.indeed.com/jobs?q=" + " ".join(args.Title) + "&l=" + " ".join(args.Location) + "&start=" + str(i)
+    indJobs = indJobs + getIndeedJobs(url)
     i += 1
 
 #searched_jobs1 = results1.find_all(
@@ -86,23 +76,12 @@ while i < 10:
 #searched_jobs2 = results2.find_all(
 #    'h2', string=lambda text: ' '.join(args.Title))
 
-for s_job in jobslist3:
-    title = s_job.find('h2', class_='title')
-    company = s_job.find(class_='company')
-    if None in (title, company):
-        continue
-    link = s_job.find('a')['href'].replace("/rc/clk?", "")
-    link = link.split("id", 1)[0]
-    print(title.text + company.text)
-    if "company" in link:
-        print(f"https://www.indeed.com{link}")
-    elif "pagead" in link:
-        print(f"https://www.indeed.com{link}")
-    else:
-        print(f"https://www.indeed.com/viewjob?{link}")
 for s_job in monJobs:
+    s_job.printData()
+    print('\n')
+for s_job in indJobs:
     s_job.printData()
     print('\n')
 
 print("Number of total Jobs")
-print(len(monJobs) + len(jobslist3))
+print(len(monJobs) + len(indJobs))
