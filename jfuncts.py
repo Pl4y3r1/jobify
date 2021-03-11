@@ -55,3 +55,19 @@ def getIndeedJobs(url):
             joblist.append(JOB(title.text.strip(), company.text.strip(), link))
     return joblist
 
+def getZipJobs(url):
+    joblist = []
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, 'html.parser')
+    print(soup)
+    result = soup.find(id='job_results')
+    print(result)
+    jobs = result.find_all('article', class_='quiz-card-')
+    for s_job in jobs:
+        title = s_job.find('h2', class_='job_title')
+        company = s_job.find(class_='job_org')
+        if None in (title, company):
+    	    continue
+        print(company.text.strip())
+        print(title.text.strip())
+    return joblist
